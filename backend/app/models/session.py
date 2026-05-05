@@ -16,6 +16,7 @@ class IChatSession(BaseModel):
     card_id: str
     mode: EChatMode = EChatMode.PLAY
     name: str = ""
+    card_name: str = ""
     greeting_index: int = 0
 
     model: str = ""

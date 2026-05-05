@@ -17,6 +17,10 @@ export async function fetchCard(cardId: string) {
   return data;
 }
 
+export async function deleteCard(cardId: string) {
+  await api.delete(`/cards/${cardId}`);
+}
+
 // Sessions
 export async function fetchSessions(cardId: string) {
   const { data } = await api.get(`/sessions/card/${cardId}`);
@@ -199,4 +203,219 @@ export function streamChat(
 export async function fetchMemories(sessionId: string) {
   const { data } = await api.get(`/chat/${sessionId}/memories`);
   return data;
+}
+
+// ====== Creation Module ======
+
+export async function fetchCreationSessions() {
+  const { data } = await api.get('/creation/sessions');
+  return data;
+}
+
+export async function createCreationSession(): Promise<{
+  session: import('@/types').IChatSession;
+  card: import('@/types').ICharacterCard;
+}> {
+  const { data } = await api.post('/creation/sessions');
+  return data;
+}
+
+export async function deleteCreationSession(sessionId: string) {
+  await api.delete(`/creation/sessions/${sessionId}`);
+}
+
+export async function fetchCreationSession(sessionId: string): Promise<{
+  session: import('@/types').IChatSession;
+  card: import('@/types').ICharacterCard;
+}> {
+  const { data } = await api.get(`/creation/sessions/${sessionId}`);
+  return data;
+}
+
+export async function fetchCreationMessages(sessionId: string) {
+  const { data } = await api.get(`/creation/messages/${sessionId}`);
+  return data;
+}
+
+export async function updateCreationCard(
+  cardId: string,
+  body: { field: string; value: unknown },
+) {
+  const { data } = await api.patch(`/creation/card/${cardId}`, body);
+  return data;
+}
+
+export async function publishCreationCard(sessionId: string) {
+  const { data } = await api.post(`/creation/publish/${sessionId}`);
+  return data;
+}
+
+export async function fetchLinkedWorldbooks(cardId: string) {
+  const { data } = await api.get(`/creation/card/${cardId}/worldbooks`);
+  return data;
+}
+
+export async function uploadCreationFile(
+  sessionId: string,
+  file: File,
+): Promise<{ ok: boolean; filename: string; content_preview: string; char_count: number }> {
+  const form = new FormData();
+  form.append('file', file);
+  const resp = await fetch(`/api/creation/upload/${sessionId}`, {
+    method: 'POST',
+    body: form,
+  });
+  if (!resp.ok) {
+    const err = await resp.json();
+    throw new Error(err.detail || 'upload failed');
+  }
+  return resp.json();
+}
+
+export function streamCreation(
+  sessionId: string,
+  input: string,
+  onEvent: (event: SSEEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const url = `/api/creation/stream/${sessionId}?input=${encodeURIComponent(input)}`;
+
+  return fetch(url, {
+    method: 'POST',
+    headers: { Accept: 'text/event-stream' },
+    signal,
+  }).then(async (response) => {
+    if (!response.ok) {
+      let detail = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errBody = await response.json();
+        detail = errBody.detail || detail;
+      } catch { /* use status text */ }
+      throw new Error(detail);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error('ReadableStream not supported');
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const event: SSEEvent = JSON.parse(line.slice(6));
+              onEvent(event);
+            } catch {
+              // skip malformed JSON lines
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  });
+}
+
+// ====== Konata Chat ======
+
+export interface ICardSummary {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  sessions: Array<{
+    id: string;
+    name: string;
+    updated_at: string;
+    created_at: string;
+    message_count: number;
+  }>;
+}
+
+export async function fetchKonataSessions() {
+  const { data } = await api.get('/konata/sessions');
+  return data;
+}
+
+export async function createKonataSession() {
+  const { data } = await api.post('/konata/sessions');
+  return data;
+}
+
+export async function deleteKonataSession(sessionId: string) {
+  await api.delete(`/konata/sessions/${sessionId}`);
+}
+
+export async function fetchKonataMessages(sessionId: string) {
+  const { data } = await api.get(`/konata/messages/${sessionId}`);
+  return data;
+}
+
+export async function fetchCardsSummary(): Promise<{ cards: ICardSummary[] }> {
+  const { data } = await api.get('/konata/cards-summary');
+  return data;
+}
+
+export function streamKonata(
+  sessionId: string,
+  input: string,
+  onEvent: (event: SSEEvent) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const url = `/api/konata/stream/${sessionId}?input=${encodeURIComponent(input)}`;
+
+  return fetch(url, {
+    method: 'POST',
+    headers: { Accept: 'text/event-stream' },
+    signal,
+  }).then(async (response) => {
+    if (!response.ok) {
+      let detail = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errBody = await response.json();
+        detail = errBody.detail || detail;
+      } catch { /* use status text */ }
+      throw new Error(detail);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error('ReadableStream not supported');
+
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const event: SSEEvent = JSON.parse(line.slice(6));
+              onEvent(event);
+            } catch {
+              // skip malformed JSON lines
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  });
 }

@@ -201,7 +201,7 @@ export default function ChatPage() {
   const charName = store.currentCard?.character?.name || '助手';
 
   return (
-    <div className="h-screen flex flex-col bg-[#f8f4f0]">
+    <div className="h-full flex flex-col bg-[#f8f4f0]">
       {/* Top Bar */}
       <div className="flex-shrink-0 flex items-center gap-4 px-4 py-3 border-b border-gray-200 bg-white/95 backdrop-blur z-10">
         <Button

@@ -239,6 +239,13 @@ def init_db():
         conn.execute("ALTER TABLE character_cards ADD COLUMN background_json TEXT DEFAULT '{}'")
         conn.commit()
 
+    # Ensure the system card exists for konata chat sessions (FK constraint)
+    conn.execute("""
+        INSERT OR IGNORE INTO character_cards (id, name, description, tags, created_at, updated_at)
+        VALUES ('_konata_system', 'Izumi Studio 系统助手', '系统对话功能的虚拟角色卡', '[]', datetime('now'), datetime('now'))
+    """)
+    conn.commit()
+
     # Run WAL checkpoint to clear stale shared memory after unclean shutdown
     conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
     conn.commit()

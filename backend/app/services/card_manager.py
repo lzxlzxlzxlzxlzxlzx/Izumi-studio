@@ -7,7 +7,9 @@ from app.models.card import ICharacterCard, ICharacterDefinition, ICoverInfo, IA
 
 def list_cards(search: str = "", tags: list[str] | None = None) -> list[ICharacterCard]:
     conn = get_conn()
-    rows = conn.execute("SELECT * FROM character_cards ORDER BY created_at DESC").fetchall()
+    rows = conn.execute(
+        "SELECT * FROM character_cards WHERE id != '_konata_system' ORDER BY created_at DESC"
+    ).fetchall()
     cards = [_row_to_card(r) for r in rows]
     conn.close()
 
@@ -103,11 +105,33 @@ def update_card(card_id: str, **fields) -> ICharacterCard | None:
 
 def delete_card(card_id: str) -> bool:
     conn = get_conn()
-    cur = conn.execute("DELETE FROM character_cards WHERE id = ?", (card_id,))
+
+    # Verify card exists
+    card = conn.execute("SELECT id FROM character_cards WHERE id = ?", (card_id,)).fetchone()
+    if not card:
+        conn.close()
+        return False
+
+    # Cascade delete: find all sessions for this card
+    sessions = conn.execute(
+        "SELECT id FROM chat_sessions WHERE card_id = ?", (card_id,)
+    ).fetchall()
+    session_ids = [s["id"] for s in sessions]
+
+    for sid in session_ids:
+        conn.execute("DELETE FROM chat_messages WHERE session_id = ?", (sid,))
+        conn.execute("DELETE FROM story_characters WHERE session_id = ?", (sid,))
+        conn.execute("DELETE FROM character_change_logs WHERE session_id = ?", (sid,))
+        conn.execute("DELETE FROM memory_summaries WHERE session_id = ?", (sid,))
+        conn.execute("DELETE FROM long_term_memories WHERE session_id = ?", (sid,))
+        conn.execute("DELETE FROM worldbook_runtime_state WHERE session_id = ?", (sid,))
+        conn.execute("DELETE FROM ui_state WHERE session_id = ?", (sid,))
+
+    conn.execute("DELETE FROM chat_sessions WHERE card_id = ?", (card_id,))
+    conn.execute("DELETE FROM character_cards WHERE id = ?", (card_id,))
     conn.commit()
-    ok = cur.rowcount > 0
     conn.close()
-    return ok
+    return True
 
 
 def _insert_card(card: ICharacterCard):

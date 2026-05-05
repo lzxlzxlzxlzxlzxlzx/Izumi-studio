@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Input, Tag, Spin, message, Tabs, Descriptions, Form, Empty, Select, Switch, Slider } from 'antd';
+import { Button, Input, Tag, Spin, message, Tabs, Descriptions, Form, Empty, Select, Switch, Slider, Popconfirm } from 'antd';
 import {
   ArrowLeftOutlined,
   SaveOutlined,
   EditOutlined,
+  DeleteOutlined,
   UserOutlined,
   FileTextOutlined,
   TeamOutlined,
@@ -12,7 +13,7 @@ import {
   BookOutlined,
   PictureOutlined,
 } from '@ant-design/icons';
-import { fetchCard, updateCard, fetchWorldbooks, fetchPresets, uploadImage } from '@/api/client';
+import { fetchCard, updateCard, deleteCard, fetchWorldbooks, fetchPresets, uploadImage } from '@/api/client';
 import type { ICharacterCard } from '@/types';
 
 const MODEL_OPTIONS = [
@@ -174,9 +175,20 @@ export default function CardDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!cardId) return;
+    try {
+      await deleteCard(cardId);
+      message.success('角色卡已删除');
+      navigate('/cards');
+    } catch {
+      message.error('删除失败');
+    }
+  }
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#f8f4f0]">
+      <div className="flex items-center justify-center h-full bg-[#f8f4f0]">
         <Spin size="large" />
       </div>
     );
@@ -184,7 +196,7 @@ export default function CardDetailPage() {
 
   if (!card) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#f8f4f0]">
+      <div className="flex items-center justify-center h-full bg-[#f8f4f0]">
         <Empty description="未找到角色卡" />
       </div>
     );
@@ -195,7 +207,7 @@ export default function CardDetailPage() {
     : {};
 
   return (
-    <div className="h-screen flex flex-col bg-[#f8f4f0]">
+    <div className="h-full flex flex-col bg-[#f8f4f0]">
       {/* Header */}
       <div className="flex-shrink-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
@@ -232,14 +244,31 @@ export default function CardDetailPage() {
               </Button>
             </div>
           ) : (
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={startEditing}
-              className="bg-primary-500 hover:bg-primary-600"
-            >
-              编辑
-            </Button>
+            <div className="flex gap-2">
+              <Popconfirm
+                title="确定删除此角色卡？"
+                description="删除后无法恢复，相关的会话和消息也会被删除。"
+                onConfirm={handleDelete}
+                okText="删除"
+                cancelText="取消"
+                okButtonProps={{ danger: true }}
+              >
+                <Button
+                  icon={<DeleteOutlined />}
+                  danger
+                >
+                  删除
+                </Button>
+              </Popconfirm>
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={startEditing}
+                className="bg-primary-500 hover:bg-primary-600"
+              >
+                编辑
+              </Button>
+            </div>
           )}
         </div>
       </div>

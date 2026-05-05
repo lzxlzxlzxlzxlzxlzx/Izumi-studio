@@ -78,7 +78,7 @@ export default function CardGalleryPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#f8f4f0]">
+    <div className="h-full flex flex-col bg-[#f8f4f0]">
       {/* Header */}
       <div className="flex-shrink-0 px-8 py-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
