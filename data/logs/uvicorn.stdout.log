@@ -1,0 +1,41 @@
+INFO:     Will watch for changes in these directories: ['C:\\Users\\24652\\Desktop\\projects\\aichat\\backend']
+INFO:     Uvicorn running on http://0.0.0.0:8004 (Press CTRL+C to quit)
+INFO:     Started reloader process [29176] using WatchFiles
+INFO:     Started server process [31440]
+INFO:     Waiting for application startup.
+[2026-05-05 00:29:32] INFO    uvicorn.error        | Application startup complete.
+[2026-05-05 00:29:38] INFO    uvicorn.access       | 127.0.0.1:2530 - "GET /api/health HTTP/1.1" 200
+[2026-05-05 00:31:29] INFO    app.routers.chat     | [session=ce6504c5] worldbook_scan | before=1 after=7 depth=0
+[2026-05-05 00:31:29] INFO    app.routers.chat     | [session=ce6504c5] request | model=deepseek-chat msgs=13 tokens~3311 wc=2000-5500 temp=1.0 input_len=28
+[2026-05-05 00:31:30] INFO    uvicorn.access       | 127.0.0.1:13359 - "POST /api/chat/stream/ce6504c5f97a?input=%E5%85%88%E6%89%93%E5%B1%81%E8%82%A1%E5%86%8D%E6%93%8D%E5%B1%81%E7%9C%BC%EF%BC%88734%E7%9A%84%E5%B1%9E%E6%80%A7%E6%A0%8F%E5%A2%9E%E5%8A%A0%E5%B1%81%E8%82%A1%E7%8A%B6%E6%80%81%E5%92%8C%E5%B1%81%E7%A9%B4%E7%8A%B6%E6%80%81%EF%BC%89 HTTP/1.1" 200
+[2026-05-05 00:32:18] INFO    app.routers.chat     | [session=ce6504c5] response | len=5028 text=厨房里水声哗啦哗啦响着，碗碟碰撞的脆响混着734断断续续的哼歌声。我靠在门框边看她——小家伙踮着脚尖站在水槽前，白色马尾随着手臂的动作轻轻晃动，腰间的围裙系带重新系好了，在背后打了个精巧的蝴蝶结。
+
+只是那截露出的臀肉上，粉红色的印记还没完全消退。
+
+她关掉水龙头，甩了甩手上的水珠，转身——
+
+「少爷，您站在门口偷看我洗碗，不觉得无聊吗？」
+
+「看你洗碗不无聊。」
+
+「您这嘴今天抹了蜜。」她把最后
+[2026-05-05 00:32:23] INFO    app.services.memory_system | [session=ce6504c5] memory | extracted 4 new facts (total 12)
+[2026-05-05 00:32:23] INFO    app.routers.chat     | [session=ce6504c5] memory | extracted 4 new facts
+[2026-05-05 00:32:25] INFO    app.routers.chat     | [session=ce6504c5] post-process | 1 tool calls
+[2026-05-05 00:32:25] INFO    app.routers.chat     | [session=ce6504c5] stream | completed
+[2026-05-05 00:32:25] INFO    uvicorn.access       | 127.0.0.1:12511 - "GET /api/chat/messages/ce6504c5f97a HTTP/1.1" 200
+[2026-05-05 00:32:44] INFO    uvicorn.access       | 127.0.0.1:4226 - "GET /api/chat/ce6504c5f97a/memories HTTP/1.1" 200
+[2026-05-05 00:32:56] INFO    uvicorn.access       | 127.0.0.1:2832 - "GET /api/sessions/ce6504c5f97a/characters HTTP/1.1" 200
+[2026-05-05 00:33:03] INFO    uvicorn.access       | 127.0.0.1:2148 - "GET /api/chat/ce6504c5f97a/memories HTTP/1.1" 200
+[2026-05-05 00:33:26] INFO    uvicorn.access       | 127.0.0.1:9207 - "GET /api/sessions/ce6504c5f97a/characters HTTP/1.1" 200
+[2026-05-05 00:36:19] INFO    uvicorn.access       | 127.0.0.1:3229 - "GET /api/chat/messages/ce6504c5f97a HTTP/1.1" 200
+[2026-05-05 00:36:19] INFO    uvicorn.access       | 127.0.0.1:3233 - "GET /api/chat/messages/ce6504c5f97a HTTP/1.1" 200
+[2026-05-05 00:36:19] INFO    uvicorn.access       | 127.0.0.1:3235 - "GET /api/sessions/ce6504c5f97a HTTP/1.1" 200
+[2026-05-05 00:36:19] INFO    uvicorn.access       | 127.0.0.1:3237 - "GET /api/sessions/ce6504c5f97a HTTP/1.1" 200
+[2026-05-05 00:36:20] INFO    uvicorn.access       | 127.0.0.1:14177 - "GET /api/cards/94226d18c703 HTTP/1.1" 200
+[2026-05-05 00:36:20] INFO    uvicorn.access       | 127.0.0.1:10582 - "GET /api/cards/94226d18c703 HTTP/1.1" 200
+[2026-05-05 00:36:20] INFO    uvicorn.access       | 127.0.0.1:1770 - "GET /api/sessions/card/94226d18c703 HTTP/1.1" 200
+[2026-05-05 00:36:20] INFO    uvicorn.access       | 127.0.0.1:8996 - "GET /api/sessions/card/94226d18c703 HTTP/1.1" 200
+[2026-05-05 00:40:23] INFO    uvicorn.access       | 127.0.0.1:13940 - "GET /api/health HTTP/1.1" 200
+[2026-05-05 00:41:38] INFO    uvicorn.access       | 127.0.0.1:11801 - "GET /api/health HTTP/1.1" 200
+[2026-05-05 00:41:51] INFO    uvicorn.access       | 127.0.0.1:7149 - "GET /api/health HTTP/1.0" 200

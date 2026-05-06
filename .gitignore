@@ -2,6 +2,11 @@ node_modules/
 __pycache__/
 *.pyc
 .env
-data/
+# AI START
+# data/ 纳入版本控制；SQLite 需覆盖下方 *.db 全局忽略。
+# AI END
 *.db
+# AI START
+!data/izumi.db
+# AI END
 .DS_Store
