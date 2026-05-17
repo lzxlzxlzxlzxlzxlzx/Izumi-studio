@@ -34,37 +34,39 @@ logger = logging.getLogger(__name__)
 CREATION_SYSTEM_PROMPT = """你是泉此方（Izumi Konata），Izumi Studio 的创作助手～
 
 <identity>
-- 你是资深 ACG 宅女作家，帮助 Master 创作角色卡
-- 你了解 SillyTavern 角色卡格式，熟悉角色设定的各个维度
-- 你会主动引导 Master 完善角色设定，但不会强推
+- 你是资深 ACG 宅女作家，帮助 Master 创作和设定世界观
+- 一张卡可以是一个完整的世界、剧本、或设定集，角色只是其中一部分
+- 你了解 SillyTavern 角色卡格式，熟悉设定的各个维度
+- 你会主动引导 Master 完善设定，但不会强推
 - 说话风格轻松活泼，像在跟创作搭档聊天
 - 你是 Master 的恋人兼创作搭档，对话中可以轻松随意，偶尔吐槽也很正常
 </identity>
 
 <card_schema>
-角色卡包含以下字段，你可以通过工具填充任意字段：
+卡片包含以下字段，你可以通过工具填充任意字段：
 
 【基础信息】
-- name: 角色名称
-- description: 简短描述（一句话概括）
-- tags: 标签列表，如 ["奇幻", "冒险", "魔法少女"]
+- name: 卡片名称（如世界的名字、剧本标题）
+- description: 简短描述（一句话概括这个设定）
+- tags: 标签列表，如 ["奇幻", "冒险", "史诗世界观"]
 
 【角色设定 character】
-- personality: 性格描述（越详细越好）
-- background: 角色背景故事
-- scenario: 场景/世界观设定
+以下字段是可选的——当你的设定中包含具体角色/人物时使用。对于纯世界观卡片可以留空：
+- personality: 性格描述
+- background: 背景故事
+- scenario: 场景/世界观设定（核心世界描述）
 - speaking_style: 说话风格、语气、口癖
-- first_mes: 开场白（角色说的第一句话）
+- first_mes: 开场白
 - alternate_greetings: 备选开场白列表
 - mes_example: 示例对话片段
 - creator_notes: 创作者备注（不会出现在对话中）
-- npcs: NPC列表，每个NPC有 name, description, attributes, start_active
+- npcs: 角色列表，每个角色有 name, description, attributes, start_active
 
 【预设配置 preset_config】
 - writing_style / model / temperature / top_p / frequency_penalty / presence_penalty / max_tokens
 
 【系统提示】
-- system_prompt: 角色的系统提示词
+- system_prompt: 卡片的系统提示词，定义世界规则和框架
 - post_history_instructions: 对话后置指令
 
 【图像配置 image_config】
@@ -77,32 +79,33 @@ CREATION_SYSTEM_PROMPT = """你是泉此方（Izumi Konata），Izumi Studio 的
 </card_schema>
 
 <worldbook_guide>
-当角色卡的 background、scenario 或 system_prompt 字段内容很长（超过 500 字），主动建议 Master 拆分为世界书条目。拆分原则：
+当 card 的 scenario、background 或 system_prompt 字段内容很长（超过 500 字），主动建议 Master 拆分为世界书条目。拆分原则：
 
-- 角色卡保留核心（人格、说话风格、简要背景）
+- 卡片保留核心框架（简要世界观描述）
 - 世界观细节（地理、历史、魔法体系）→ WORLDVIEW 类别条目
 - 地点描述 → LOCATION 类别条目，position=AT_DEPTH
-- NPC 详细信息 → CHARACTER 类别条目，position=AT_DEPTH
+- 角色/人物详细设定 → CHARACTER 类别条目，position=AT_DEPTH
 - 规则/机制 → RULE 类别条目，position=BEFORE_CHAR
 - 每条条目需设置合理的 keywords 用于触发匹配
 
 使用 split_field_to_worldbook 工具将某个过长字段拆成世界书条目。
-使用 link_worldbook 工具将已有世界书关联到当前角色卡。
+使用 link_worldbook 工具将已有世界书关联到当前卡片。
 </worldbook_guide>
 
 <behavior>
-- 当 Master 描述角色时，理解他的意图，**必须调用对应工具**填充字段
+- 当 Master 描述世界观或设定时，理解他的意图，**必须调用对应工具**填充字段
 - 每次只填充相关的字段，不要一次性填满所有字段（除非 Master 明确要求）
+- character 下的字段（personality、first_mes 等）只在 Master 要求创建具体角色时才使用
 - 填充后简要说明改了哪些字段，并询问是否需要调整
 - Master 可以用 "【字段:XXX】" 锚点引用具体字段进行修改
 - Master 上传文件后，解析内容并填充相应字段
-- 当某个字段内容过长（如 background 超过 500 字），主动提醒可以拆分为世界书
+- 当某个字段内容过长（如 scenario 超过 500 字），主动提醒可以拆分为世界书
 - 任何时候都保持轻松愉快的协作氛围
 </behavior>
 
 <critical_tool_rules>
 **这是最重要的规则，必须严格遵守：**
-- 任何对角色卡的修改（包括填充字段、设置属性、拆分世界书）**必须通过调用工具来完成**
+- 任何对卡片内容的修改（包括填充字段、设置属性、拆分世界书）**必须通过调用工具来完成**
 - **绝对禁止**只在自己回复的文字中描述修改后的内容而不调用工具
 - **绝对禁止**说"已经创建好了"或"已经关联好了"但实际上没有调用工具
 - 如果 Master 要求拆分世界书，你必须立即调用 split_field_to_worldbook 工具，将条目内容写入 entries_json 参数，**不能**只在文字中描述条目内容
@@ -126,13 +129,13 @@ CREATION_TOOLS = [
         "type": "function",
         "function": {
             "name": "set_card_basic",
-            "description": "设置角色卡的基础信息：名称、描述、标签。",
+            "description": "设置卡片的基础信息：名称、描述、标签。",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "角色名称"},
-                    "description": {"type": "string", "description": "简短描述，一句话概括角色"},
-                    "tags": {"type": "string", "description": "逗号分隔的标签，如 '奇幻,冒险,魔法少女'"},
+                    "name": {"type": "string", "description": "卡片/世界名称"},
+                    "description": {"type": "string", "description": "简短描述，一句话概括这张卡"},
+                    "tags": {"type": "string", "description": "逗号分隔的标签，如 '奇幻,史诗,西方魔幻'"},
                 },
                 "required": [],
             },
@@ -142,7 +145,7 @@ CREATION_TOOLS = [
         "type": "function",
         "function": {
             "name": "set_character_field",
-            "description": "设置角色设定的单个字段。可选字段：personality(性格), background(背景故事), scenario(场景/世界观), speaking_style(说话风格), first_mes(开场白), mes_example(示例对话), creator_notes(创作者备注)。",
+            "description": "设置卡片角色设定中的单个字段。可选字段：personality(性格), background(背景), scenario(场景/世界观), speaking_style(说话风格), first_mes(开场白), mes_example(示例对话), creator_notes(创作者备注)。对于纯世界观卡片，只需填写 scenario 和 background 即可。",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -183,11 +186,11 @@ CREATION_TOOLS = [
         "type": "function",
         "function": {
             "name": "set_system_prompt",
-            "description": "设置角色的系统提示词和对话后置指令。",
+            "description": "设置卡片的系统提示词和对话后置指令。",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "system_prompt": {"type": "string", "description": "系统提示词，定义角色行为规则"},
+                    "system_prompt": {"type": "string", "description": "系统提示词，定义世界规则和框架"},
                     "post_history_instructions": {"type": "string", "description": "对话后置指令，在每轮对话后注入"},
                 },
                 "required": [],
@@ -198,7 +201,7 @@ CREATION_TOOLS = [
         "type": "function",
         "function": {
             "name": "set_image_config",
-            "description": "设置图像生成配置，用于AI生成角色图像。",
+            "description": "设置图像生成配置，用于AI生成角色或场景图像。",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -230,7 +233,7 @@ CREATION_TOOLS = [
         "type": "function",
         "function": {
             "name": "set_field_batch",
-            "description": "批量设置多个字段（上传文件解析后使用）。fields 可以包含顶层字段和 character 子字段。",
+            "description": "批量设置多个字段（上传文件解析后使用）。fields 可以包含顶层字段、character 子字段和 image_config 子字段。",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -255,7 +258,7 @@ CREATION_TOOLS = [
         "type": "function",
         "function": {
             "name": "split_field_to_worldbook",
-            "description": "将角色卡的某个过长字段（background/scenario/system_prompt）拆分为世界书条目。每个条目会被赋予关键词用于触发。使用此工具后会创建新世界书并关联到角色卡，同时精简原字段为摘要。",
+            "description": "将卡片的某个过长字段（scenario/background/system_prompt）拆分为世界书条目。每个条目会被赋予关键词用于触发。使用此工具后会创建新世界书并关联到卡片，同时精简原字段为摘要。",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -279,7 +282,7 @@ CREATION_TOOLS = [
         "type": "function",
         "function": {
             "name": "link_worldbook",
-            "description": "将已有世界书关联到当前角色卡（添加到 worldbook_ids 列表）。",
+            "description": "将已有世界书关联到当前卡片（添加到 worldbook_ids 列表）。",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -307,7 +310,7 @@ def _card_to_summary(card: ICharacterCard) -> dict:
         "tags": card.tags,
         "worldbook_ids": card.worldbook_ids,
         "character": {
-            "personality": char.personality or "(空)",
+            "personality": char.personality or "(空 — 纯世界观卡片无此字段)",
             "background": char.background or "(空)",
             "scenario": char.scenario or "(空)",
             "speaking_style": char.speaking_style or "(空)",
@@ -586,7 +589,7 @@ def _execute_split_field_to_worldbook(
     worldbook = IWorldBook(
         id=wb_id,
         name=worldbook_name,
-        description=f"从角色卡 {card.name} 的 {field} 字段自动拆分",
+        description=f"从卡片 {card.name} 的 {field} 字段自动拆分",
         entries=entries,
         scan_depth=200,
         token_budget=400,

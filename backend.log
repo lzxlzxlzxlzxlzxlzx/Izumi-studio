@@ -1,0 +1,6 @@
+INFO:     Started server process [29360]
+INFO:     Waiting for application startup.
+[2026-05-06 19:05:05] INFO    uvicorn.error        | Application startup complete.
+[2026-05-06 19:05:05] ERROR   uvicorn.error        | [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8004): 通常每个套接字地址(协议/网络地址/端口)只允许使用一次。
+[2026-05-06 19:05:05] INFO    uvicorn.error        | Waiting for application shutdown.
+[2026-05-06 19:05:05] INFO    uvicorn.error        | Application shutdown complete.
