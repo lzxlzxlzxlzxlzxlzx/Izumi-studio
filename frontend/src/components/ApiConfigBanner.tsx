@@ -28,8 +28,8 @@ export default function ApiConfigBanner() {
         type="info"
         showIcon
         className="rounded-none border-x-0 border-t-0"
-        message="GitLab Pages 静态预览"
-        description="此为前端界面预览，聊天/创作需本地或服务器部署完整版（前后端）。克隆仓库后运行 start.sh，并在设置中填写你自己的 API Key。"
+        message="在线静态预览"
+        description="此为 GitHub Pages 前端界面预览。聊天/创作需克隆仓库本地运行完整版（前后端），并在设置中填写你自己的 API Key。"
       />
     );
   }
