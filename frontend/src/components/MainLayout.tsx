@@ -1,5 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { PlayCircleOutlined, MessageOutlined, EditOutlined } from '@ant-design/icons';
+import ApiConfigBanner from './ApiConfigBanner';
 
 const NAV_ITEMS = [
   {
@@ -30,6 +31,7 @@ export default function MainLayout() {
 
   return (
     <div className="h-screen flex flex-col bg-[#f8f4f0]">
+      <ApiConfigBanner />
       {/* Content area */}
       <div className="flex-1 overflow-hidden">
         <Outlet />

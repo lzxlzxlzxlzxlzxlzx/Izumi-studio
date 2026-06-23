@@ -1,0 +1,20 @@
+# GitLab Pages — static frontend preview (full app needs backend self-host)
+image: node:20
+
+pages:
+  stage: deploy
+  script:
+    - cd frontend
+    - npm ci
+    - export VITE_STATIC_PAGES=1
+    - export VITE_BASE_URL=/$CI_PROJECT_NAME/
+    - npm run build
+    - cd ..
+    - mkdir -p public
+    - cp -r frontend/dist/* public/
+    - cp frontend/dist/index.html public/404.html
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main"

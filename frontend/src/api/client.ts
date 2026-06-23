@@ -1,6 +1,17 @@
 import axios from 'axios';
 import type { IToolCall } from '@/types';
 
+/** UUID v4, fallback when crypto.randomUUID unavailable (HTTP IP access). */
+export function genId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
 const api = axios.create({
   baseURL: '/api',
   timeout: 30000,
@@ -418,4 +429,29 @@ export function streamKonata(
       reader.releaseLock();
     }
   });
+}
+
+// Runtime LLM config (stored server-side in data/local_config.json)
+export interface LlmConfigStatus {
+  deepseek_configured: boolean;
+  dashscope_configured: boolean;
+  llm_configured: boolean;
+  api_url: string;
+  dashscope_api_url: string;
+  source: string;
+}
+
+export async function fetchLlmConfig(): Promise<LlmConfigStatus> {
+  const { data } = await api.get('/config');
+  return data;
+}
+
+export async function saveLlmConfig(payload: {
+  API_KEY?: string;
+  API_URL?: string;
+  DASHSCOPE_API_KEY?: string;
+  DASHSCOPE_API_URL?: string;
+}): Promise<LlmConfigStatus> {
+  const { data } = await api.put('/config', payload);
+  return data;
 }

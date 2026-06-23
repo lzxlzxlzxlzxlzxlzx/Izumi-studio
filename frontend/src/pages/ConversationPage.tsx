@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Input, Spin, message, Tag } from 'antd';
 import { SendOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { fetchKonataMessages, streamKonata, createKonataSession, type SSEEvent } from '@/api/client';
+import { fetchKonataMessages, streamKonata, createKonataSession, genId, type SSEEvent } from '@/api/client';
 import { useKonataStore } from '@/stores/konataStore';
 import ConversationSidebar from '@/components/ConversationSidebar';
 import ReferencePanel from '@/components/ReferencePanel';
@@ -60,7 +60,7 @@ export default function ConversationPage() {
 
     // Append local user message for immediate display
     const userMsg: any = {
-      id: crypto.randomUUID(),
+      id: genId(),
       session_id: sessionId,
       role: 'user',
       name: 'user',

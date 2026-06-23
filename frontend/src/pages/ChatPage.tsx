@@ -11,7 +11,7 @@ import {
   BookOutlined,
   CloseOutlined,
 } from '@ant-design/icons';
-import { fetchMessages, fetchSessions, streamChat, uploadImage } from '@/api/client';
+import { fetchMessages, fetchSessions, streamChat, uploadImage, genId } from '@/api/client';
 import type { SSEEvent } from '@/api/client';
 import { useSessionStore } from '@/stores/sessionStore';
 import CharacterRegistryModal from '@/components/CharacterRegistryModal';
@@ -101,7 +101,7 @@ export default function ChatPage() {
     store.resetStreaming();
 
     const userMsg: IChatMessage = {
-      id: crypto.randomUUID(),
+      id: genId(),
       session_id: sessionId,
       role: 'user',
       name: 'user',

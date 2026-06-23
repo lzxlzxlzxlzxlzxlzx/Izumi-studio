@@ -24,6 +24,7 @@ import {
   fetchCreationSessions,
   deleteCreationSession,
   fetchLinkedWorldbooks,
+  genId,
   type SSEEvent,
 } from '@/api/client';
 import { useCreationStore } from '@/stores/creationStore';
@@ -100,7 +101,7 @@ export default function CreationPage() {
     store.resetStreaming();
 
     const userMsg: any = {
-      id: crypto.randomUUID(),
+      id: genId(),
       session_id: sessionId,
       role: 'user',
       name: 'user',

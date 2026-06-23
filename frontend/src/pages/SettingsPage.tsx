@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Switch, Select, Input, Card, Divider, message } from 'antd';
 import {
@@ -7,7 +7,9 @@ import {
   RobotOutlined,
   SettingOutlined,
   BellOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
+import { fetchLlmConfig, saveLlmConfig } from '@/api/client';
 
 interface Settings {
   model: string;
@@ -54,6 +56,25 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [saved, setSaved] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [apiUrl, setApiUrl] = useState('https://api.deepseek.com/v1/chat/completions');
+  const [dashscopeKey, setDashscopeKey] = useState('');
+  const [dashscopeUrl, setDashscopeUrl] = useState('https://dashscope.aliyuncs.com/compatible-mode/v1');
+  const [llmStatus, setLlmStatus] = useState<string>('');
+
+  useEffect(() => {
+    fetchLlmConfig()
+      .then((s) => {
+        setApiUrl(s.api_url);
+        setDashscopeUrl(s.dashscope_api_url);
+        setLlmStatus(
+          s.llm_configured
+            ? `已配置（DeepSeek${s.dashscope_configured ? ' + 百炼' : ''}）`
+            : '未配置',
+        );
+      })
+      .catch(() => setLlmStatus('无法读取后端配置'));
+  }, []);
 
   function update<K extends keyof Settings>(key: K, value: Settings[K]) {
     setSettings((prev) => ({ ...prev, [key]: value }));
@@ -64,6 +85,27 @@ export default function SettingsPage() {
     localStorage.setItem('izumi-settings', JSON.stringify(settings));
     message.success('设置已保存');
     setSaved(true);
+  }
+
+  async function handleSaveApi() {
+    try {
+      const status = await saveLlmConfig({
+        API_KEY: apiKey,
+        API_URL: apiUrl,
+        DASHSCOPE_API_KEY: dashscopeKey,
+        DASHSCOPE_API_URL: dashscopeUrl,
+      });
+      setApiKey('');
+      setDashscopeKey('');
+      setLlmStatus(
+        status.llm_configured
+          ? `已配置（DeepSeek${status.dashscope_configured ? ' + 百炼' : ''}）`
+          : '未配置',
+      );
+      message.success('API 配置已保存到服务器');
+    } catch {
+      message.error('保存 API 配置失败，请确认后端已启动');
+    }
   }
 
   return (
@@ -93,6 +135,50 @@ export default function SettingsPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        {/* API 配置 */}
+        <Card
+          className="bg-white border-gray-200"
+          title={
+            <span className="flex items-center gap-2 text-gray-800">
+              <KeyOutlined className="text-amber-500" /> API 配置
+            </span>
+          }
+          extra={<span className="text-xs text-gray-400">{llmStatus}</span>}
+        >
+          <p className="text-sm text-gray-500 mb-4">
+            请填写你自己的 API Key。配置保存在本机 <code>data/local_config.json</code>，不会提交到 Git 仓库。
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-gray-400 block mb-2">DeepSeek API Key</label>
+              <Input.Password
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="留空则保持现有密钥不变"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 block mb-2">DeepSeek API URL</label>
+              <Input value={apiUrl} onChange={(e) => setApiUrl(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 block mb-2">百炼 DashScope API Key（图像理解，可选）</label>
+              <Input.Password
+                value={dashscopeKey}
+                onChange={(e) => setDashscopeKey(e.target.value)}
+                placeholder="留空则保持现有密钥不变"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 block mb-2">百炼 API URL</label>
+              <Input value={dashscopeUrl} onChange={(e) => setDashscopeUrl(e.target.value)} />
+            </div>
+            <Button type="primary" onClick={handleSaveApi} className="bg-primary-500 hover:bg-primary-600">
+              保存 API 配置
+            </Button>
+          </div>
+        </Card>
+
         {/* 模型设置 */}
         <Card
           className="bg-white border-gray-200"
@@ -223,7 +309,7 @@ export default function SettingsPage() {
 
         <div className="text-xs text-gray-300 space-y-1">
           <p>Izumi Studio v0.1.0</p>
-          <p>设置保存在浏览器本地存储中。</p>
+          <p>模型偏好保存在浏览器本地；API Key 保存在服务器 data/local_config.json。</p>
         </div>
       </div>
     </div>

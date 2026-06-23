@@ -101,9 +101,14 @@ def delete_session(session_id: str):
     conn.execute("DELETE FROM chat_messages WHERE session_id = ?", (session_id,))
     conn.execute("DELETE FROM chat_sessions WHERE id = ?", (session_id,))
 
-    # Delete the card (and cascade its play sessions if any)
+    # Delete the card if no other sessions reference it
     if card_id and card_id != "_konata_system":
-        conn.execute("DELETE FROM character_cards WHERE id = ?", (card_id,))
+        ref_count = conn.execute(
+            "SELECT COUNT(*) FROM chat_sessions WHERE card_id = ? AND id != ?",
+            (card_id, session_id),
+        ).fetchone()[0]
+        if ref_count == 0:
+            conn.execute("DELETE FROM character_cards WHERE id = ?", (card_id,))
 
     conn.commit()
     conn.close()

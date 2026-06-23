@@ -8,8 +8,10 @@ export default defineConfig(({ mode }) => {
 
   const backendPort = env.BACKEND_PORT || '8004';
   const frontendPort = parseInt(env.FRONTEND_PORT || '5173', 10);
+  const base = env.VITE_BASE_URL || '/';
 
   return {
+    base,
     plugins: [react()],
     resolve: {
       alias: {
@@ -17,6 +19,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      host: '0.0.0.0',
       port: frontendPort,
       proxy: {
         '/api': {

@@ -154,7 +154,7 @@ export default function CardGalleryPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <Empty description="没有找到角色卡" />
+            <Empty description="暂无角色卡，可通过「导入」添加或前往「创作」新建" />
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">

@@ -23,6 +23,11 @@ def _load_dotenv():
 _load_dotenv()
 
 
+def _env(key: str, default: str = "") -> str:
+    from app.services.runtime_config import get_value
+    return get_value(key, os.getenv(key, default))
+
+
 class Settings:
     app_name: str = "Izumi Studio"
     version: str = "0.1.0"
@@ -38,19 +43,19 @@ class Settings:
 
     @property
     def deepseek_api_key(self) -> str:
-        return os.getenv("API_KEY", "")
+        return _env("API_KEY", "")
 
     @property
     def deepseek_api_url(self) -> str:
-        return os.getenv("API_URL", "https://api.deepseek.com/v1/chat/completions")
+        return _env("API_URL", "https://api.deepseek.com/v1/chat/completions")
 
     @property
     def dashscope_api_key(self) -> str:
-        return os.getenv("DASHSCOPE_API_KEY", os.getenv("DASH_SCOPE_KEY", ""))
+        return _env("DASHSCOPE_API_KEY", os.getenv("DASH_SCOPE_KEY", ""))
 
     @property
     def dashscope_api_url(self) -> str:
-        return os.getenv("DASHSCOPE_API_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        return _env("DASHSCOPE_API_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
 
     @property
     def kimi_api_key(self) -> str:

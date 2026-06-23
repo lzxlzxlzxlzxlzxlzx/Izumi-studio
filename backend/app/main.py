@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.db.schema import init_db
 from app.logging_config import setup_logging
-from app.routers import cards, sessions, chat, import_routes, presets, worldbooks, upload, konata, creation
+from app.routers import cards, sessions, chat, import_routes, presets, worldbooks, upload, konata, creation, runtime_config
 
 
 @asynccontextmanager
@@ -38,10 +38,17 @@ app.include_router(worldbooks.router, prefix="/api/worldbooks", tags=["worldbook
 app.include_router(upload.router, prefix="/api/upload", tags=["upload"])
 app.include_router(konata.router, prefix="/api/konata", tags=["konata"])
 app.include_router(creation.router, prefix="/api/creation", tags=["creation"])
+app.include_router(runtime_config.router, prefix="/api/config", tags=["config"])
 
 app.mount("/uploads", StaticFiles(directory=str(settings.uploads_dir)), name="uploads")
 
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "version": settings.version}
+    from app.services.runtime_config import get_public_status
+    status = get_public_status()
+    return {
+        "status": "ok",
+        "version": settings.version,
+        "llm_configured": status["llm_configured"],
+    }
