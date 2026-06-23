@@ -256,7 +256,7 @@ function CharacterDetail({
             角色图
           </span>
           <input
-            ref={fileInputRef}
+            ref={fileInputRef as React.Ref<HTMLInputElement>}
             type="file"
             accept="image/*"
             className="hidden"

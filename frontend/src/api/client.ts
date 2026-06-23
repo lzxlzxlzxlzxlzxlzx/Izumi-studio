@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { IToolCall } from '@/types';
+import type { IToolCall, IStoryCharacter } from '@/types';
 
 /** UUID v4, fallback when crypto.randomUUID unavailable (HTTP IP access). */
 export function genId(): string {
@@ -47,7 +47,7 @@ export async function deleteSession(sessionId: string) {
   await api.delete(`/sessions/${sessionId}`);
 }
 
-export async function fetchCharacters(sessionId: string) {
+export async function fetchCharacters(sessionId: string): Promise<IStoryCharacter[]> {
   const { data } = await api.get(`/sessions/${sessionId}/characters`);
   return data;
 }
